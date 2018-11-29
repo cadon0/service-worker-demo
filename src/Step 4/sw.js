@@ -2,23 +2,35 @@ self.addEventListener("install", function(event) {
   // Steps to install the service worker
   event.waitUntil(
     caches.open("image-cache").then(function(cache) {
-      console.log("Opened cache");
-      return cache.add("./logo.svg");
+      return cache.add("./logo.png");
     })
   );
 });
 
 self.addEventListener("fetch", function(event) {
-  event.respondWith(
-    caches.match(event.request).then(function(response) {
-      // Cache hit - return cached data
-      if (response) {
-        console.log(`returning ${event.request.url} from cache`);
-        return response;
-      }
-      // Not found in cache - fetch from server
-      console.log(`Fetching ${event.request.url} from server`);
-      return fetch(event.request);
-    })
-  );
+  event.respondWith(tryNetworkWithTimeout(event.request, 1000).catch(tryCache));
 });
+
+function tryNetworkWithTimeout(request, timeout) {
+  console.log("Attempting to use the network...");
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(reject, timeout);
+
+    fetch(request).then(response => {
+      console.log("Fetch from network successful!");
+      clearTimeout(timeoutId);
+      resolve(response);
+    });
+  });
+}
+
+async function tryCache(request) {
+  console.log("Fetch from network took too long, searching cache...");
+  const cache = await caches.open("image-cache");
+  const matching = await cache.match(request);
+  if (matching) {
+    console.log("Found in cache!");
+    return matching;
+  }
+  console.log("Not found in cache either :(");
+}
