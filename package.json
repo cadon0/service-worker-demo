@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "serve": "serve src",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "serve src"
   },
   "author": "",
   "license": "ISC",

@@ -12,7 +12,7 @@ self.addEventListener("fetch", function(event) {
     caches.match(event.request).then(function(response) {
       // Cache hit - return cached data
       if (response) {
-        console.log(`returning ${event.request.url} from cache`);
+        console.log(`Returning ${event.request.url} from cache`);
         return response;
       }
       // Not found in cache - fetch from server
